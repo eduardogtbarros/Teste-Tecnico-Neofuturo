@@ -1,1 +1,3 @@
-# Teste-Tecnico-Neofuturo
+# Teste Técnico Neofuturo
+
+> Você vai construir uma pequena aplicação de gestão de compras (procurement). O sistema permite cadastrar fornecedores, registrar solicitações de compra e usar uma camada simples de IA para gerar automaticamente um parecer sobre cada solicitação, com prioridade e um breve resumo. O escopo é intencionalmente enxuto. Backend e frontend devem ser implementados em TypeScript.
