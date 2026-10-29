@@ -4,12 +4,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({isGlobal: true}),
     DatabaseModule,
-    SuppliersModule
+    SuppliersModule,
+    PurchaseRequestsModule
   ],
   controllers: [AppController],
   providers: [AppService],
