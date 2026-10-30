@@ -8,7 +8,10 @@ import { PurchaseRequestsModule } from './purchase-requests/purchase-requests.mo
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal: true}),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '../.env'
+    }),
     DatabaseModule,
     SuppliersModule,
     PurchaseRequestsModule

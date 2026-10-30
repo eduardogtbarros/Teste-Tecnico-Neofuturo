@@ -32,10 +32,27 @@ export class PurchaseRequestsService {
 
   async findAll(status?: string) {
     const result = await this.database.query(
-      `SELECT *
-       FROM purchase_requests
-       WHERE $1::VARCHAR IS NULL OR status = $1
-       ORDER BY created_at DESC`,
+      `SELECT
+        pr.id,
+        pr.item_name,
+        pr.quantity,
+        pr.supplier_id,
+        pr.requester_name,
+        pr.justification,
+        pr.status,
+        pr.created_at,
+        ar.priority AS ai_priority,
+        ar.summary_text AS ai_summary_text
+      FROM purchase_requests pr
+      LEFT JOIN LATERAL (
+        SELECT priority, summary_text
+        FROM ai_reviews
+        WHERE purchase_request_id = pr.id
+        ORDER BY generated_at DESC
+        LIMIT 1
+      ) ar ON true
+      WHERE $1::VARCHAR IS NULL OR pr.status = $1
+      ORDER BY pr.created_at DESC`,
       [status ?? null],
     );
 
