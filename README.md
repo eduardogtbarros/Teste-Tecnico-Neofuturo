@@ -1,124 +1,144 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Sistema de Gestão de Solicitações de Compras
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Aplicação web para gerenciamento de fornecedores e solicitações de compras, com integração a uma inteligência artificial para análise e classificação de prioridades.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Tecnologias utilizadas
 
-## Description
+- **Backend:** NestJS, Node.js e TypeScript
+- **Frontend:** Next.js, React e TypeScript
+- **Banco de dados:** PostgreSQL
+- **Integração com IA:** OpenAI API
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Estrutura do projeto
 
-## Project setup
-
-```bash
-$ npm install
+```text
+Teste-Tecnico-Neofuturo/
+├── backend/          # API desenvolvida com NestJS
+├── frontend/         # Interface desenvolvida com Next.js
+├── database/         # Scripts SQL para criação do banco e das tabelas
+├── .env.example      # Exemplo das variáveis de ambiente
+└── README.md
 ```
 
-## Compile and run the project
+## Pré-requisitos
+
+Antes de executar o projeto, é necessário ter instalado:
+
+- [Node.js](https://nodejs.org/) e npm
+- [PostgreSQL](https://www.postgresql.org/download/)
+- Git
+
+Para utilizar a funcionalidade de análise por inteligência artificial, também é necessária uma chave válida da API da OpenAI.
+
+## 1. Clonar o repositório
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/eduardogtbarros/Teste-Tecnico-Neofuturo.git
+cd Teste-Tecnico-Neofuturo
 ```
 
-## Run tests
+## 2. Configurar as variáveis de ambiente
+
+Na raiz do projeto, crie o arquivo `.env` a partir do arquivo de exemplo:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
+Edite o arquivo `.env` e informe os dados de acesso ao PostgreSQL e sua chave da OpenAI:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+```env
+# Backend
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=sua_senha
+DB_DATABASE=procurement_db
+OPENAI_API_KEY=sua_chave
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+Substitua `sua_senha` pela senha configurada no PostgreSQL e `sua_chave` por uma chave válida da OpenAI.
+
+## 3. Configurar o banco de dados
+
+Certifique-se de que o serviço do PostgreSQL esteja em execução.
+
+No terminal, a partir da pasta raiz do projeto, execute o primeiro script para criar o banco de dados:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+psql -U postgres -f database/create_database.sql
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-To add it to this project:
+Em seguida, execute o script responsável pela criação das tabelas:
 
 ```bash
-$ npm install @nestjs/observe
+psql -U postgres -d procurement_db -f database/create_tables.sql
 ```
 
-Then follow the [setup guide](https://docs.nestjs.com/observability/overview) - it takes a single import and an app key.
+Caso necessário, informe a senha do usuário PostgreSQL quando solicitada.
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+## 4. Instalar as dependências
 
-## Resources
+Abra um terminal na pasta `backend`:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+cd backend
+npm install
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Depois, em outro terminal, abra a pasta `frontend`:
 
-## Support
+```bash
+cd frontend
+npm install
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 5. Executar o projeto
 
-## Stay in touch
+O backend e o frontend devem ser executados simultaneamente, cada um em seu próprio terminal.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+**Backend**
 
-## License
+Na pasta `backend`, execute:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run start:dev
+```
+
+A API ficará disponível em:
+
+```text
+http://localhost:3000
+```
+
+**Frontend**
+
+Na pasta `frontend`, execute:
+
+```bash
+npm run dev -- -p 3001
+```
+
+A aplicação ficará disponível em:
+
+```text
+http://localhost:3001
+```
+
+## Funcionalidades
+
+- Cadastro e listagem de fornecedores.
+- Cadastro e listagem de solicitações de compras.
+- Consulta detalhada de uma solicitação.
+- Filtro de solicitações por status.
+- Atualização do status para pendente, aprovado ou rejeitado.
+- Análise de solicitações por inteligência artificial, com classificação de prioridade e geração de resumo.
+
+## Observações
+
+- O PostgreSQL deve permanecer em execução enquanto a aplicação estiver sendo utilizada.
+- A funcionalidade de análise por IA depende de uma chave válida da OpenAI configurada no arquivo `.env`.
+- O arquivo `.env` contém informações sensíveis e não deve ser compartilhado ou enviado ao repositório.
