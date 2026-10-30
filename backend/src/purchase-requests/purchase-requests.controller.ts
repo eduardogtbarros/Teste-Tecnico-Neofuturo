@@ -34,6 +34,11 @@ export class PurchaseRequestsController {
     return this.purchaseRequestsService.findOne(id);
   }
 
+  @Post(':id/review')
+  generateReview(@Param('id', ParseIntPipe) id: number) {
+    return this.purchaseRequestsService.generateReview(id);
+  }
+
   @Patch(':id/status')
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
