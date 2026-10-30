@@ -100,12 +100,21 @@ export default function Home() {
             </p>
           </div>
 
-          <Link
-            href="/purchase-requests/new"
-            className="rounded-lg bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
-          >
-            + Nova solicitação
-          </Link>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              href="/suppliers/new"
+              className="rounded-lg border border-blue-600 px-5 py-3 text-center text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+            >
+              + Novo fornecedor
+            </Link>
+
+            <Link
+              href="/purchase-requests/new"
+              className="rounded-lg bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-700"
+            >
+              + Nova solicitação
+            </Link>
+          </div>
         </header>
 
         <section className="mb-8 grid gap-4 sm:grid-cols-2">
