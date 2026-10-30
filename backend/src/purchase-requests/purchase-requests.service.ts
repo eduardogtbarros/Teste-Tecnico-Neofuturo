@@ -61,9 +61,21 @@ export class PurchaseRequestsService {
 
   async findOne(id: number) {
     const requestResult = await this.database.query(
-      `SELECT *
-       FROM purchase_requests
-       WHERE id = $1`,
+      `SELECT
+        pr.*,
+        CASE
+          WHEN s.id IS NULL THEN NULL
+          ELSE json_build_object(
+            'id', s.id,
+            'name', s.name,
+            'email', s.email,
+            'phone', s.phone,
+            'category', s.category
+          )
+        END AS supplier
+       FROM purchase_requests pr
+       LEFT JOIN suppliers s ON s.id = pr.supplier_id
+       WHERE pr.id = $1`,
       [id],
     );
 

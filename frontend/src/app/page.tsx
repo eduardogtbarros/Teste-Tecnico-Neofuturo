@@ -27,6 +27,12 @@ function PriorityBadge({ priority }: { priority: string | null }) {
     return <span className="text-sm text-gray-400">Sem parecer</span>;
   }
 
+  const priorityLabels: Record<string, string> = {
+    high: "Alta",
+    medium: "Média",
+    low: "Baixa",
+  };
+  
   const styles: Record<string, string> = {
     high: "bg-red-100 text-red-700",
     medium: "bg-yellow-100 text-yellow-700",
@@ -39,7 +45,7 @@ function PriorityBadge({ priority }: { priority: string | null }) {
         styles[priority] ?? "bg-gray-100 text-gray-700"
       }`}
     >
-      {priority.charAt(0).toUpperCase() + priority.slice(1)}
+      {priorityLabels[priority] ?? priority}
     </span>
   );
 }
