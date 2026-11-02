@@ -128,6 +128,47 @@ A aplicação ficará disponível em:
 http://localhost:3001
 ```
 
+## Testes
+
+O backend possui testes unitários desenvolvidos com **Jest** e **NestJS Testing**, utilizando mocks para simular as operações com o banco de dados, sem depender de uma conexão real durante a execução dos testes.
+
+Para executar os testes, acesse a pasta do backend:
+
+```bash
+cd backend
+```
+
+Execute todos os testes:
+
+```bash
+npm test -- --runInBand
+```
+
+Para executar os testes de um serviço específico:
+
+```bash
+npm test -- --runInBand src/suppliers/suppliers.service.spec.ts
+```
+
+```bash
+npm test -- --runInBand src/purchase-requests/purchase-requests.service.spec.ts
+```
+
+Para executar os testes e gerar um relatório de cobertura:
+
+```bash
+npm run test:cov
+```
+
+### Cobertura dos testes
+
+Os testes verificam:
+
+- **Controller:** funcionamento do endpoint de verificação da conexão com o banco de dados, utilizando um mock.
+- **Fornecedores:** cadastro e listagem de fornecedores, incluindo campos opcionais.
+- **Solicitações de compra:** cadastro, listagem, consulta, atualização de status e tratamento de erros.
+- **Pareceres de IA:** tratamento de solicitações inexistentes e ausência da chave da API da OpenAI.
+
 ## Funcionalidades
 
 - Cadastro e listagem de fornecedores.
