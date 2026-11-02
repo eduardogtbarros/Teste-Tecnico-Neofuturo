@@ -2,8 +2,14 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
+  HttpException,
+  HttpStatus,
+  GatewayTimeoutException,
 } from '@nestjs/common';
-import OpenAI from 'openai';
+import OpenAI, {
+  APIConnectionTimeoutError,
+  RateLimitError,
+} from 'openai';
 
 import { DatabaseService } from '../database/database.service';
 import { CreatePurchaseRequestDto } from './dto/create-purchase-request.dto';
@@ -114,6 +120,14 @@ export class PurchaseRequestsService {
     return result.rows[0];
   }
 
+  private createOpenAIClient(apiKey: string) {
+    return new OpenAI({
+      apiKey,
+      timeout: 30_000,
+      maxRetries: 2,
+    });
+  }
+
   async generateReview(id: number) {
     // Busca os dados da solicitação
     const result = await this.database.query(
@@ -138,54 +152,75 @@ export class PurchaseRequestsService {
       );
     }
 
-    const openai = new OpenAI({ apiKey });
+    const openai = this.createOpenAIClient(apiKey);
 
     // Pede à IA que classifique a solicitação
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: `
-            Você analisa solicitações de compra de uma organização.
-            Classifique a prioridade como high, medium ou low,
-            considerando o item solicitado, a quantidade e a justificativa.
-            Gere um resumo objetivo, com no máximo duas frases,
-            explicando o motivo da classificação.
-            Não invente informações que não estejam nos dados.
-          `,
-        },
-        {
-          role: 'user',
-          content: JSON.stringify({
-            item: request.item_name,
-            quantidade: request.quantity,
-            justificativa: request.justification,
-          }),
-        },
-      ],
-      response_format: {
-        type: 'json_schema',
-        json_schema: {
-          name: 'purchase_request_review',
-          strict: true,
-          schema: {
-            type: 'object',
-            properties: {
-              priority: {
-                type: 'string',
-                enum: ['high', 'medium', 'low'],
+    let completion;
+
+    try {
+      completion = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `
+              Você analisa solicitações de compra de uma organização.
+              Classifique a prioridade como high, medium ou low,
+              considerando o item solicitado, a quantidade e a justificativa.
+              Gere um resumo objetivo, com no máximo duas frases,
+              explicando o motivo da classificação.
+              Não invente informações que não estejam nos dados.
+            `,
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({
+              item: request.item_name,
+              quantidade: request.quantity,
+              justificativa: request.justification,
+            }),
+          },
+        ],
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'purchase_request_review',
+            strict: true,
+            schema: {
+              type: 'object',
+              properties: {
+                priority: {
+                  type: 'string',
+                  enum: ['high', 'medium', 'low'],
+                },
+                summary_text: {
+                  type: 'string',
+                },
               },
-              summary_text: {
-                type: 'string',
-              },
+              required: ['priority', 'summary_text'],
+              additionalProperties: false,
             },
-            required: ['priority', 'summary_text'],
-            additionalProperties: false,
           },
         },
-      },
-    });
+      });
+    } catch (error) {
+      if (error instanceof RateLimitError) {
+        throw new HttpException(
+          'Limite de requisições à API da OpenAI atingido. Tente novamente mais tarde.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
+      if (error instanceof APIConnectionTimeoutError) {
+        throw new GatewayTimeoutException(
+          'A OpenAI demorou muito para responder. Tente novamente.',
+        );
+      }
+
+      throw new InternalServerErrorException(
+        'Não foi possível gerar o parecer com a OpenAI.',
+      );
+    }
 
     // Interpreta a resposta da IA
     const content = completion.choices[0]?.message.content;
