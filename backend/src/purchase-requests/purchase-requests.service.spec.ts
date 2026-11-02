@@ -1,16 +1,31 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PurchaseRequestsService } from './purchase-requests.service';
-import { DatabaseService } from '../database/database.service';
 import {
   NotFoundException,
-  InternalServerErrorException
+  InternalServerErrorException,
 } from '@nestjs/common';
+import { PurchaseRequestsService } from './purchase-requests.service';
+import { DatabaseService } from '../database/database.service';
 
 describe('PurchaseRequestsService', () => {
   let service: PurchaseRequestsService;
 
   const mockDatabase = {
     query: jest.fn(),
+  };
+
+  const mockOpenAI = {
+    chat: {
+      completions: {
+        create: jest.fn(),
+      },
+    },
+  };
+
+  const mockPurchaseRequest = {
+    id: 1,
+    item_name: 'Notebook',
+    quantity: 2,
+    justification: 'Substituição de equipamentos antigos',
   };
 
   beforeEach(async () => {
@@ -29,6 +44,11 @@ describe('PurchaseRequestsService', () => {
     );
 
     jest.clearAllMocks();
+
+    jest.spyOn(
+      service as any,
+      'createOpenAIClient',
+    ).mockReturnValue(mockOpenAI);
   });
 
   describe('create', () => {
@@ -258,14 +278,7 @@ describe('PurchaseRequestsService', () => {
       delete process.env.OPENAI_API_KEY;
 
       mockDatabase.query.mockResolvedValueOnce({
-        rows: [
-          {
-            id: 1,
-            item_name: 'Notebook',
-            quantity: 2,
-            justification: 'Substituição de equipamentos antigos',
-          },
-        ],
+        rows: [mockPurchaseRequest],
         rowCount: 1,
       });
 
@@ -278,12 +291,65 @@ describe('PurchaseRequestsService', () => {
       } finally {
         if (apiKeyOriginal !== undefined) {
           process.env.OPENAI_API_KEY = apiKeyOriginal;
-        }
-        else{
+        } else {
           delete process.env.OPENAI_API_KEY;
         }
       }
+    });
 
+    it('deve gerar um parecer com a OpenAI e salvá-lo no banco', async () => {
+      const apiKeyOriginal = process.env.OPENAI_API_KEY;
+      process.env.OPENAI_API_KEY = 'test-api-key';
+
+      const parecer = {
+        id: 1,
+        purchase_request_id: 1,
+        priority: 'high',
+        summary_text: 'Equipamentos antigos precisam ser substituídos.',
+      };
+
+      mockDatabase.query
+        .mockResolvedValueOnce({
+          rows: [mockPurchaseRequest],
+          rowCount: 1,
+        })
+        .mockResolvedValueOnce({
+          rows: [parecer],
+        });
+
+      mockOpenAI.chat.completions.create.mockResolvedValueOnce({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                priority: 'high',
+                summary_text: parecer.summary_text,
+              }),
+            },
+          },
+        ],
+      });
+
+      try {
+        const resultado = await service.generateReview(1);
+
+        expect(resultado).toEqual(parecer);
+
+        expect(mockOpenAI.chat.completions.create).toHaveBeenCalledTimes(1);
+
+        expect(mockDatabase.query).toHaveBeenCalledTimes(2);
+
+        expect(mockDatabase.query).toHaveBeenLastCalledWith(
+          expect.stringContaining('INSERT INTO ai_reviews'),
+          [1, 'high', parecer.summary_text],
+        );
+      } finally {
+        if (apiKeyOriginal !== undefined) {
+          process.env.OPENAI_API_KEY = apiKeyOriginal;
+        } else {
+          delete process.env.OPENAI_API_KEY;
+        }
+      }
     });
   });
 });
