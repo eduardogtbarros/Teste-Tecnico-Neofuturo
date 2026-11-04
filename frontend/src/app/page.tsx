@@ -16,6 +16,15 @@ interface PurchaseRequest {
   ai_summary_text: string | null;
 }
 
+interface PaginatedResponse {
+  data: PurchaseRequest[];
+  total: number;
+  pendingTotal: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
   approved: "Aprovada",
@@ -55,6 +64,10 @@ export default function Home() {
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [totalRequests, setTotalRequests] = useState(0);
+  const [pendingRequests, setPendingRequests] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
     async function loadRequests() {
@@ -62,12 +75,23 @@ export default function Home() {
         setLoading(true);
         setError("");
 
-        const endpoint = statusFilter
-          ? `/purchase-requests?status=${encodeURIComponent(statusFilter)}`
-          : "/purchase-requests";
+        const params = new URLSearchParams({
+          page: String(currentPage),
+          limit: "10",
+        });
 
-        const data = await api.get<PurchaseRequest[]>(endpoint);
-        setRequests(data);
+        if (statusFilter) {
+          params.set("status", statusFilter);
+        }
+
+        const response = await api.get<PaginatedResponse>(
+          `/purchase-requests?${params.toString()}`
+        );
+
+        setRequests(response.data);
+        setTotalRequests(response.total);
+        setTotalPages(response.totalPages);
+        setPendingRequests(response.pendingTotal);
       } catch (err) {
         setError(
           err instanceof Error
@@ -80,12 +104,7 @@ export default function Home() {
     }
 
     loadRequests();
-  }, [statusFilter]);
-
-  const totalRequests = requests.length;
-  const pendingRequests = requests.filter(
-    (request) => request.status === "pending"
-  ).length;
+  }, [statusFilter, currentPage]);
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-900">
@@ -93,7 +112,7 @@ export default function Home() {
         <header className="mb-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">
-              Solicitações de Compra
+              Gestão de Compras
             </h1>
             <p className="mt-2 text-gray-500">
               Gerencie e acompanhe as solicitações de compra.
@@ -142,7 +161,10 @@ export default function Home() {
 
             <select
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
+              onChange={(event) => {
+                setStatusFilter(event.target.value);
+                setCurrentPage(1);
+              }}
               className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm outline-none focus:border-blue-500"
             >
               <option value="">Todos os status</option>
@@ -220,6 +242,30 @@ export default function Home() {
               </table>
             </div>
           )}
+
+          <div className="flex items-center justify-between border-t border-gray-200 px-6 py-4">
+            <p className="text-sm text-gray-500">
+              Página {currentPage} de {totalPages}
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((page) => page - 1)}
+                disabled={currentPage === 1 || loading}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Anterior
+              </button>
+
+              <button
+                onClick={() => setCurrentPage((page) => page + 1)}
+                disabled={currentPage >= totalPages || loading}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Próxima
+              </button>
+            </div>
+          </div>
         </section>
       </div>
     </main>

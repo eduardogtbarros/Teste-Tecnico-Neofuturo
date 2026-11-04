@@ -167,7 +167,7 @@ Os testes verificam:
 - **Controller:** funcionamento do endpoint de verificação da conexão com o banco de dados, utilizando um mock.
 - **Fornecedores:** cadastro e listagem de fornecedores, incluindo campos opcionais.
 - **Solicitações de compra:** cadastro, listagem, consulta, atualização de status e tratamento de erros.
-- **Pareceres de IA:** tratamento de solicitações inexistentes e ausência da chave da API da OpenAI.
+- **Pareceres de IA:** tratamento de solicitações inexistentes, ausência da chave da API da OpenAI e geração do parecer.
 
 ## Funcionalidades
 

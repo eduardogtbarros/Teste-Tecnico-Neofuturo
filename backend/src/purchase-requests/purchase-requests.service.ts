@@ -36,7 +36,10 @@ export class PurchaseRequestsService {
     return result.rows[0];
   }
 
-  async findAll(status?: string) {
+  async findAll(status?: string, page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+
+    // Busca as solicitações da página atual
     const result = await this.database.query(
       `SELECT
         pr.id,
@@ -58,11 +61,37 @@ export class PurchaseRequestsService {
         LIMIT 1
       ) ar ON true
       WHERE $1::VARCHAR IS NULL OR pr.status = $1
-      ORDER BY pr.created_at DESC`,
+      ORDER BY pr.created_at DESC
+      LIMIT $2 OFFSET $3`,
+      [status ?? null, limit, offset],
+    );
+
+    // Conta quantas solicitações existem com o filtro aplicado e quantas estão pendentes
+    const countResult = await this.database.query(
+      `SELECT
+        (
+          SELECT COUNT(*)
+          FROM purchase_requests
+          WHERE $1::VARCHAR IS NULL OR status = $1
+        ) AS total,
+        (
+          SELECT COUNT(*)
+          FROM purchase_requests
+          WHERE status = 'pending'
+        ) AS pending_total`,
       [status ?? null],
     );
 
-    return result.rows;
+    const total = Number(countResult.rows[0].total);
+    const pendingTotal = Number(countResult.rows[0].pending_total);
+    return {
+      data: result.rows,
+      total,
+      pendingTotal,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async findOne(id: number) {

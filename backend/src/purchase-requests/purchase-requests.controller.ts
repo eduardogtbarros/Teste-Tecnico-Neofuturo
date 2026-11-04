@@ -25,8 +25,16 @@ export class PurchaseRequestsController {
   }
 
   @Get()
-  findAll(@Query('status') status?: string) {
-    return this.purchaseRequestsService.findAll(status);
+  findAll(
+    @Query('status') status?: string,
+    @Query('page') page = '1',
+    @Query('limit') limit = '10',
+  ) {
+    return this.purchaseRequestsService.findAll(
+      status,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @Get(':id')
