@@ -111,7 +111,7 @@ docker compose up
 
 ## Testes
 
-O backend possui testes unitários desenvolvidos com **Jest** e **NestJS Testing**, utilizando mocks para simular as operações com o banco de dados, sem depender de uma conexão real durante a execução dos testes.
+O backend possui testes unitários desenvolvidos com **Jest** e **NestJS Testing**, utilizando mocks para simular as operações com o banco de dados e a integração com a OpenAI, sem depender de conexões reais durante a execução dos testes.
 
 Para executar os testes, acesse a pasta do backend:
 
@@ -147,8 +147,9 @@ Os testes verificam:
 
 - **Controller:** funcionamento do endpoint de verificação da conexão com o banco de dados, utilizando um mock.
 - **Fornecedores:** cadastro e listagem de fornecedores, incluindo campos opcionais.
-- **Solicitações de compra:** cadastro, listagem, consulta, atualização de status e tratamento de erros.
-- **Pareceres de IA:** tratamento de solicitações inexistentes, ausência da chave da API da OpenAI e geração do parecer.
+- **Solicitações de compra:** cadastro, listagem, consulta detalhada, filtragem por status, atualização de status e tratamento de solicitações inexistentes.
+- **Paginação e contagem:** retorno dos registros da página solicitada, cálculo do total de páginas, contagem de solicitações conforme o filtro aplicado e contagem independente das solicitações pendentes.
+- **Pareceres de IA:** tratamento de solicitações inexistentes, ausência da chave da API da OpenAI, geração e armazenamento do parecer, tratamento de limite de requisições (*rate limit*) e timeout na comunicação com a API.
 
 ## Funcionalidades
 
