@@ -1,4 +1,4 @@
-# Sistema de Gestão de Solicitações de Compras
+# Teste Técnico Neofuturo — Sistema de Gestão de Compras
 
 Aplicação web para gerenciamento de fornecedores e solicitações de compras, com integração a uma inteligência artificial para análise e classificação de prioridades.
 
@@ -8,25 +8,34 @@ Aplicação web para gerenciamento de fornecedores e solicitações de compras, 
 - **Frontend:** Next.js, React e TypeScript
 - **Banco de dados:** PostgreSQL
 - **Integração com IA:** OpenAI API
+- **Containerização:** Docker e Docker Compose
+- **Testes:** Jest e NestJS Testing
 
 ## Estrutura do projeto
 
 ```text
 Teste-Tecnico-Neofuturo/
-├── backend/          # API desenvolvida com NestJS
-├── frontend/         # Interface desenvolvida com Next.js
-├── database/         # Scripts SQL para criação do banco e das tabelas
-├── .env.example      # Exemplo das variáveis de ambiente
+├── backend/
+|   ├── .dockerignore
+│   ├── Dockerfile
+│   └── ...
+├── frontend/
+|   ├── .dockerignore
+│   ├── Dockerfile
+│   └── ...
+├── database/
+│   └── create_tables.sql
+├── .env.example
+├── docker-compose.yml
 └── README.md
 ```
 
 ## Pré-requisitos
 
-Antes de executar o projeto, é necessário ter instalado:
+Para executar o projeto utilizando Docker, é necessário ter instalado:
 
-- [Node.js](https://nodejs.org/) e npm
-- [PostgreSQL](https://www.postgresql.org/download/)
-- Git
+- [Git](https://git-scm.com/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
 Para utilizar a funcionalidade de análise por inteligência artificial, também é necessária uma chave válida da API da OpenAI.
 
@@ -45,12 +54,10 @@ Na raiz do projeto, crie o arquivo `.env` a partir do arquivo de exemplo:
 cp .env.example .env
 ```
 
-Edite o arquivo `.env` e informe os dados de acesso ao PostgreSQL e sua chave da OpenAI:
+Edite o arquivo `.env` e informe as configurações:
 
 ```env
 # Backend
-DB_HOST=localhost
-DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=sua_senha
 DB_DATABASE=procurement_db
@@ -60,72 +67,46 @@ OPENAI_API_KEY=sua_chave
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-Substitua `sua_senha` pela senha configurada no PostgreSQL e `sua_chave` por uma chave válida da OpenAI.
+Substitua `sua_senha` por uma senha de sua preferência e `sua_chave` por uma chave válida da OpenAI.
 
-## 3. Configurar o banco de dados
+## 3. Executar com Docker
 
-Certifique-se de que o serviço do PostgreSQL esteja em execução.
-
-No terminal, a partir da pasta raiz do projeto, execute o primeiro script para criar o banco de dados:
+Com o Docker Desktop aberto, execute na raiz do projeto:
 
 ```bash
-psql -U postgres -f database/create_database.sql
+docker compose up --build
 ```
 
-Em seguida, execute o script responsável pela criação das tabelas:
+O Docker Compose será responsável por:
+
+- Criar e iniciar o contêiner do PostgreSQL.
+- Criar automaticamente as tabelas do banco de dados.
+- Construir e iniciar o backend.
+- Construir e iniciar o frontend.
+- Configurar a comunicação entre os serviços.
+
+Na primeira execução, o processo pode levar alguns minutos devido à construção das imagens e à inicialização do banco de dados.
+
+Após a inicialização, a aplicação estará disponível em:
+
+| Serviço | Endereço |
+|---|---|
+| Frontend | http://localhost:3001 |
+| Backend | http://localhost:3000 |
+| PostgreSQL | localhost:5432 |
+
+Para encerrar os serviços:
 
 ```bash
-psql -U postgres -d procurement_db -f database/create_tables.sql
+docker compose down
 ```
 
-Caso necessário, informe a senha do usuário PostgreSQL quando solicitada.
+Os dados do PostgreSQL são armazenados em um volume persistente chamado `postgres_data`, portanto permanecem salvos mesmo após os contêineres serem encerrados.
 
-## 4. Instalar as dependências
-
-Abra um terminal na pasta `backend`:
+Para iniciar novamente o projeto, basta executar:
 
 ```bash
-cd backend
-npm install
-```
-
-Depois, em outro terminal, abra a pasta `frontend`:
-
-```bash
-cd frontend
-npm install
-```
-
-## 5. Executar o projeto
-
-O backend e o frontend devem ser executados simultaneamente, cada um em seu próprio terminal.
-
-**Backend**
-
-Na pasta `backend`, execute:
-
-```bash
-npm run start:dev
-```
-
-A API ficará disponível em:
-
-```text
-http://localhost:3000
-```
-
-**Frontend**
-
-Na pasta `frontend`, execute:
-
-```bash
-npm run dev -- -p 3001
-```
-
-A aplicação ficará disponível em:
-
-```text
-http://localhost:3001
+docker compose up
 ```
 
 ## Testes
@@ -180,6 +161,6 @@ Os testes verificam:
 
 ## Observações
 
-- O PostgreSQL deve permanecer em execução enquanto a aplicação estiver sendo utilizada.
 - A funcionalidade de análise por IA depende de uma chave válida da OpenAI configurada no arquivo `.env`.
 - O arquivo `.env` contém informações sensíveis e não deve ser compartilhado ou enviado ao repositório.
+- Os scripts SQL de inicialização do Docker são executados automaticamente apenas quando o volume do banco é criado pela primeira vez.
